@@ -1,0 +1,531 @@
+---
+title: 'Development Guide'
+description: 'Comprehensive guide for developing with ShipKit'
+---
+
+# Development Guide
+
+This guide covers everything you need to know about developing applications with ShipKit, from local setup to production deployment.
+
+## Development Environment
+
+### IDE Configuration
+
+We recommend using [VS Code](https://code.visualstudio.com) with these essential extensions:
+
+<CardGroup cols={2}>
+  <Card title="Biome" icon="code">
+    [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) for formatting and linting
+  </Card>
+  <Card title="Tailwind CSS" icon="paintbrush">
+    [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+  </Card>
+  <Card title="MDX" icon="markdown">
+    [MDX](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx)
+  </Card>
+  <Card title="TypeScript" icon="code">
+    [TypeScript](https://marketplace.visualstudio.com/items?itemName=ms-typescript.vscode-typescript-next)
+  </Card>
+</CardGroup>
+
+#### VS Code Settings
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.preferTypeOnlyAutoImports": true
+}
+```
+
+### Development Scripts
+
+ShipKit provides comprehensive npm scripts for development:
+
+```bash
+# Development Servers
+pnpm dev           # Start development server with Turbo
+pnpm dev.legacy    # Start without Turbo
+pnpm dev.https     # Start with HTTPS
+pnpm dev.all       # Start with workers
+pnpm dev.docs      # Start documentation server
+
+# Database Management
+pnpm db.generate   # Generate Drizzle types
+pnpm db.migrate    # Run migrations
+pnpm db.push      # Push schema changes
+pnpm db.studio    # Open Drizzle Studio
+pnpm db.seed      # Seed database
+pnpm db.reset     # Reset database
+pnpm db.drop      # Drop database
+pnpm db.sync      # Sync database
+
+# Testing
+pnpm test         # Run all tests
+pnpm test:browser # Run browser tests
+pnpm test:watch   # Watch mode
+pnpm test:coverage # Generate coverage report
+
+# Code Quality
+pnpm typecheck    # Check types
+pnpm lint         # Run Biome lint
+pnpm lint.fix     # Fix linting issues
+pnpm format       # Run Biome format
+pnpm check        # Run Biome check
+
+# Workers
+pnpm workers.build # Build workers
+pnpm workers.dev   # Start worker development
+```
+
+## Project Architecture
+
+### Directory Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Authentication routes
+│   ├── (marketing)/       # Public pages
+│   ├── dashboard/         # Protected routes
+│   ├── api/               # API routes
+│   └── _components/       # Route components
+├── components/            # React components
+│   ├── ui/               # Shadcn/UI components
+│   ├── forms/            # Form components
+│   ├── blocks/           # Content blocks
+│   └── providers/        # Context providers
+├── server/               # Server-side code
+│   ├── actions/          # Server actions
+│   ├── services/         # Business logic
+│   ├── db/              # Database schema
+│   ├── utils/           # Server utilities
+│   ├── middleware/      # Custom middleware
+│   └── api/             # API endpoints
+├── lib/                  # Utilities
+│   ├── utils/           # Helper functions
+│   ├── hooks/           # Custom hooks
+│   └── config/          # Configuration
+├── workers/             # Web Workers
+├── migrations/          # Database migrations
+├── test/               # Test setup
+├── types/              # TypeScript types
+└── trpc/              # tRPC configuration
+```
+
+## Configuration Files
+
+### TypeScript Configuration
+
+```typescript
+// tsconfig.json
+{
+  "compilerOptions": {
+    /* Type Checking */
+    "strict": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+    "allowJs": true,
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    /* Emit */
+    "noEmit": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "incremental": true,
+    /* Language and Environment */
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "jsx": "preserve",
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@payload-config": ["./src/payload.config.ts"],
+      "@/public/*": ["./public/*"],
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    }
+  },
+  "include": [
+    ".eslintrc.json",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.js",
+    "**/*.md",
+    "**/*.mdx",
+    ".next/types/**/*.ts",
+    "src/types/next-auth.d.ts",
+    "next.config.ts"
+  ]
+}
+```
+
+### Testing Configuration
+
+```typescript
+// vitest.config.ts
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  plugins: [react(), tsconfigPaths()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: [
+        "node_modules/**",
+        "src/test/**",
+        "**/*.d.ts",
+        "**/*.config.ts",
+        "**/types/**",
+      ],
+    }
+  }
+});
+```
+
+### Code Quality
+
+```json
+// biome.json
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noUndeclaredVariables": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noConsoleLog": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn",
+        "useNodejsImportProtocol": "warn",
+        "useTemplate": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always"
+    }
+  }
+}
+```
+
+## Development Practices
+
+### Type Safety
+
+```typescript
+// Use strict types with Zod validation
+import { z } from "zod";
+
+// Define schema
+const userSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string().nullable(),
+  role: z.enum(["user", "admin"]),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+// Infer type from schema
+type User = z.infer<typeof userSchema>;
+
+// Type guard with schema
+function isUser(value: unknown): value is User {
+  return userSchema.safeParse(value).success;
+}
+
+// Use in server action
+async function updateUser(input: unknown) {
+  const validated = userSchema.parse(input);
+  // TypeScript knows validated is User type
+  return await db.update(users).set(validated);
+}
+```
+
+### Server Components
+
+```typescript
+// app/users/page.tsx
+import { Suspense } from "react";
+import { db } from "@/server/db";
+import { UserList } from "@/components/users/user-list";
+import { UserListSkeleton } from "@/components/users/user-list-skeleton";
+
+export default async function UsersPage() {
+  // Server-side database query
+  const users = await db.query.users.findMany({
+    orderBy: { createdAt: "desc" },
+    with: {
+      teamMemberships: {
+        with: {
+          team: true,
+        },
+      },
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">Users</h1>
+      <Suspense fallback={<UserListSkeleton />}>
+        <UserList users={users} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### Server Actions
+
+```typescript
+// src/server/actions/users.ts
+"use server";
+
+import { z } from "zod";
+import { db } from "@/server/db";
+import { users } from "@/server/db/schema";
+import { revalidatePath } from "next/cache";
+
+const updateUserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+export async function updateUser(input: z.infer<typeof updateUserSchema>) {
+  const validated = updateUserSchema.parse(input);
+
+  const [user] = await db
+    .update(users)
+    .set(validated)
+    .where(eq(users.id, validated.id))
+    .returning();
+
+  revalidatePath("/users");
+  return user;
+}
+```
+
+### Client Components
+
+```typescript
+// components/users/user-form.tsx
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { updateUser } from "@/server/actions/users";
+import { useToast } from "@/components/ui/use-toast";
+
+export function UserForm({ user }: { user: User }) {
+  const { toast } = useToast();
+  const form = useForm({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: user,
+  });
+
+  async function onSubmit(data: z.infer<typeof updateUserSchema>) {
+    try {
+      await updateUser(data);
+      toast({
+        title: "Success",
+        description: "User updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user",
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <Input {...form.register("name")} />
+      <Input {...form.register("email")} type="email" />
+      <Button type="submit" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? "Saving..." : "Save"}
+      </Button>
+    </form>
+  );
+}
+```
+
+## Testing
+
+### Unit Tests
+
+```typescript
+// src/components/button.test.tsx
+import { render, screen } from "@testing-library/react";
+import { Button } from "./button";
+
+describe("Button", () => {
+  it("renders correctly", () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole("button")).toHaveTextContent("Click me");
+  });
+
+  it("handles loading state", () => {
+    render(<Button isLoading>Click me</Button>);
+    expect(screen.getByRole("button")).toBeDisabled();
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+  });
+});
+```
+
+### E2E Tests
+
+```typescript
+// tests/e2e/auth.spec.ts
+import { test, expect } from "@playwright/test";
+
+test.describe("Authentication", () => {
+  test("successful login flow", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("test@example.com");
+    await page.getByLabel("Password").fill("password123");
+    await page.getByRole("button", { name: "Sign in" }).click();
+
+    await expect(page).toHaveURL("/dashboard");
+    await expect(page.getByText("Welcome back")).toBeVisible();
+  });
+});
+```
+
+## Deployment
+
+### Vercel Configuration
+
+```json
+// vercel.json
+{
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "src/app/api/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Performance Optimization
+
+### Image Loading
+
+```typescript
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+
+interface AvatarProps {
+  src: string;
+  alt: string;
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}
+
+export function Avatar({ src, alt, size = "md", className }: AvatarProps) {
+  const dimensions = {
+    sm: 32,
+    md: 48,
+    lg: 64,
+  };
+
+  return (
+    <div
+      className={cn(
+        "relative rounded-full overflow-hidden",
+        {
+          "w-8 h-8": size === "sm",
+          "w-12 h-12": size === "md",
+          "w-16 h-16": size === "lg",
+        },
+        className
+      )}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        width={dimensions[size]}
+        height={dimensions[size]}
+        className="object-cover"
+        priority={size === "lg"}
+      />
+    </div>
+  );
+}
+```
+
+## Next Steps
+
+1. [API Reference](/api-reference/introduction) - Explore available APIs
+2. [UI Components](/ui) - Browse component library
+3. [Authentication](/core/authentication) - Learn about auth flows
+4. [Database](/core/database) - Understand data modeling

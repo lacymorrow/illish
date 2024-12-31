@@ -1,0 +1,669 @@
+---
+title: 'Error Handling'
+description: 'Comprehensive guide to error handling in ShipKit'
+---
+
+# Error Handling
+
+This document provides a comprehensive guide to error handling in ShipKit, including error types, handling strategies, and best practices.
+
+## Error Types
+
+### Custom Error Classes
+
+```typescript
+// src/lib/errors.ts
+export class AppError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public statusCode: number = 500,
+    public details?: unknown
+  ) {
+    super(message)
+    this.name = 'AppError'
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string, details?: unknown) {
+    super(message, 'VALIDATION_ERROR', 400, details)
+    this.name = 'ValidationError'
+  }
+}
+
+export class AuthenticationError extends AppError {
+  constructor(message: string = 'Unauthorized') {
+    super(message, 'AUTHENTICATION_ERROR', 401)
+    this.name = 'AuthenticationError'
+  }
+}
+
+export class AuthorizationError extends AppError {
+  constructor(message: string = 'Forbidden') {
+    super(message, 'AUTHORIZATION_ERROR', 403)
+    this.name = 'AuthorizationError'
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(message: string) {
+    super(message, 'NOT_FOUND', 404)
+    this.name = 'NotFoundError'
+  }
+}
+```
+
+### Error Factory
+
+```typescript
+// src/lib/error-factory.ts
+import { type ZodError } from 'zod'
+import { Prisma } from '@prisma/client'
+import {
+  AppError,
+  ValidationError,
+  NotFoundError,
+  AuthenticationError,
+} from './errors'
+
+export function createError(error: unknown): AppError {
+  if (error instanceof AppError) {
+    return error
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (error.code) {
+      case 'P2002':
+        return new ValidationError('Unique constraint violation', {
+          field: error.meta?.target,
+        })
+      case 'P2025':
+        return new NotFoundError('Record not found')
+      default:
+        return new AppError(
+          'Database error',
+          'DATABASE_ERROR',
+          500,
+          error.code
+        )
+    }
+  }
+
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return new ValidationError('Invalid data provided')
+  }
+
+  if ((error as ZodError)?.issues) {
+    return new ValidationError('Validation error', {
+      issues: (error as ZodError).issues,
+    })
+  }
+
+  if (error instanceof Error) {
+    return new AppError(error.message, 'UNKNOWN_ERROR')
+  }
+
+  return new AppError('An unknown error occurred', 'UNKNOWN_ERROR')
+}
+```
+
+## API Error Handling
+
+### Route Handlers
+
+```typescript
+// src/app/api/v1/posts/route.ts
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { z } from 'zod'
+import { createError } from '@/lib/error-factory'
+import { db } from '@/server/db'
+
+const postSchema = z.object({
+  title: z.string().min(1).max(255),
+  content: z.string().optional(),
+})
+
+export async function POST(req: Request) {
+  try {
+    const session = await getServerSession()
+    if (!session?.user) {
+      throw new AuthenticationError()
+    }
+
+    const json = await req.json()
+    const body = postSchema.parse(json)
+
+    const post = await db.post.create({
+      data: {
+        ...body,
+        authorId: session.user.id,
+      },
+    })
+
+    return NextResponse.json(post, { status: 201 })
+  } catch (error) {
+    const appError = createError(error)
+
+    return NextResponse.json(
+      {
+        error: {
+          message: appError.message,
+          code: appError.code,
+          details: appError.details,
+        },
+      },
+      { status: appError.statusCode }
+    )
+  }
+}
+```
+
+### Server Actions
+
+```typescript
+// src/server/actions/posts.ts
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { getServerSession } from 'next-auth'
+import { z } from 'zod'
+import { createError } from '@/lib/error-factory'
+import { db } from '@/server/db'
+
+const createPostSchema = z.object({
+  title: z.string().min(1).max(255),
+  content: z.string().optional(),
+})
+
+export async function createPost(data: z.infer<typeof createPostSchema>) {
+  try {
+    const session = await getServerSession()
+    if (!session?.user) {
+      throw new AuthenticationError()
+    }
+
+    const validated = createPostSchema.parse(data)
+
+    const post = await db.post.create({
+      data: {
+        ...validated,
+        authorId: session.user.id,
+      },
+    })
+
+    revalidatePath('/dashboard/posts')
+    return { data: post }
+  } catch (error) {
+    const appError = createError(error)
+    return {
+      error: {
+        message: appError.message,
+        code: appError.code,
+        details: appError.details,
+      },
+    }
+  }
+}
+```
+
+## Client Error Handling
+
+### Error Boundary
+
+```typescript
+// src/components/error-boundary.tsx
+'use client'
+
+import { type ReactNode } from 'react'
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
+
+interface ErrorBoundaryProps {
+  children: ReactNode
+  fallback: ReactNode
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean
+  error?: Error
+}
+
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    Sentry.captureException(error, { extra: errorInfo })
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback
+    }
+
+    return this.props.children
+  }
+}
+
+export function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error
+  resetErrorBoundary: () => void
+}) {
+  useEffect(() => {
+    // Log error to reporting service
+    Sentry.captureException(error)
+  }, [error])
+
+  return (
+    <div className="p-4">
+      <h2 className="text-lg font-semibold">Something went wrong</h2>
+      <pre className="mt-2 text-sm text-red-500">{error.message}</pre>
+      <button
+        onClick={resetErrorBoundary}
+        className="mt-4 rounded bg-blue-500 px-4 py-2 text-white"
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+```
+
+### Error Hook
+
+```typescript
+// src/hooks/use-error.ts
+import { useState, useCallback } from 'react'
+import { toast } from 'sonner'
+import * as Sentry from '@sentry/nextjs'
+
+interface ErrorState {
+  message: string
+  code?: string
+  details?: unknown
+}
+
+export function useError() {
+  const [error, setError] = useState<ErrorState | null>(null)
+
+  const handleError = useCallback((error: unknown) => {
+    console.error('Error caught:', error)
+
+    // Report to Sentry
+    Sentry.captureException(error)
+
+    // Parse error
+    let errorState: ErrorState
+
+    if (error instanceof Error) {
+      errorState = {
+        message: error.message,
+        code: (error as any).code,
+        details: (error as any).details,
+      }
+    } else if (typeof error === 'string') {
+      errorState = { message: error }
+    } else {
+      errorState = { message: 'An unknown error occurred' }
+    }
+
+    // Set error state
+    setError(errorState)
+
+    // Show toast notification
+    toast.error(errorState.message)
+
+    return errorState
+  }, [])
+
+  const clearError = useCallback(() => {
+    setError(null)
+  }, [])
+
+  return {
+    error,
+    handleError,
+    clearError,
+  }
+}
+```
+
+## Form Error Handling
+
+### Form Validation
+
+```typescript
+// src/components/forms/post-form.tsx
+'use client'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { useError } from '@/hooks/use-error'
+import { createPost } from '@/server/actions/posts'
+
+const postSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(255),
+  content: z.string().optional(),
+})
+
+type PostFormData = z.infer<typeof postSchema>
+
+export function PostForm() {
+  const { handleError } = useError()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PostFormData>({
+    resolver: zodResolver(postSchema),
+  })
+
+  const onSubmit = async (data: PostFormData) => {
+    try {
+      const result = await createPost(data)
+
+      if (result.error) {
+        throw result.error
+      }
+
+      // Handle success
+    } catch (error) {
+      handleError(error)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          {...register('title')}
+          className={errors.title ? 'border-red-500' : ''}
+        />
+        {errors.title && (
+          <p className="text-sm text-red-500">{errors.title.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="content">Content</label>
+        <textarea
+          id="content"
+          {...register('content')}
+          className={errors.content ? 'border-red-500' : ''}
+        />
+        {errors.content && (
+          <p className="text-sm text-red-500">{errors.content.message}</p>
+        )}
+      </div>
+
+      <button type="submit">Create Post</button>
+    </form>
+  )
+}
+```
+
+## Error Monitoring
+
+### Sentry Configuration
+
+```typescript
+// src/lib/monitoring.ts
+import * as Sentry from '@sentry/nextjs'
+import { env } from '@/env.mjs'
+
+export function initErrorMonitoring() {
+  Sentry.init({
+    dsn: env.SENTRY_DSN,
+    environment: env.NODE_ENV,
+    tracesSampleRate: 1.0,
+    beforeSend(event) {
+      // Modify or filter events before sending to Sentry
+      if (env.NODE_ENV === 'development') {
+        return null
+      }
+
+      return event
+    },
+  })
+}
+
+export function captureError(
+  error: unknown,
+  context?: Record<string, unknown>
+) {
+  console.error('Error:', error)
+
+  if (env.NODE_ENV === 'development') {
+    return
+  }
+
+  Sentry.captureException(error, {
+    extra: context,
+  })
+}
+```
+
+### Error Logging
+
+```typescript
+// src/lib/logger.ts
+import pino from 'pino'
+import { env } from '@/env.mjs'
+
+export const logger = pino({
+  level: env.LOG_LEVEL || 'info',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+})
+
+export function logError(
+  error: unknown,
+  context?: Record<string, unknown>
+) {
+  if (error instanceof Error) {
+    logger.error(
+      {
+        err: {
+          message: error.message,
+          stack: error.stack,
+          ...error,
+        },
+        ...context,
+      },
+      error.message
+    )
+  } else {
+    logger.error({ err: error, ...context }, 'Unknown error')
+  }
+}
+```
+
+## Best Practices
+
+### Error Prevention
+
+1. **Type Safety**
+   ```typescript
+   // Use TypeScript and Zod for runtime type checking
+   const userSchema = z.object({
+     email: z.string().email(),
+     name: z.string().min(2),
+   })
+
+   type User = z.infer<typeof userSchema>
+   ```
+
+2. **Null Checks**
+   ```typescript
+   // Use optional chaining and nullish coalescing
+   const userName = user?.name ?? 'Anonymous'
+   ```
+
+3. **Assertions**
+   ```typescript
+   // Use assertions for type narrowing
+   function processUser(user: unknown) {
+     assert(isUser(user), 'Invalid user data')
+     // user is now typed as User
+   }
+   ```
+
+### Error Recovery
+
+1. **Retry Logic**
+   ```typescript
+   // src/lib/retry.ts
+   export async function retry<T>(
+     fn: () => Promise<T>,
+     options: {
+       attempts?: number
+       delay?: number
+     } = {}
+   ): Promise<T> {
+     const { attempts = 3, delay = 1000 } = options
+
+     for (let i = 0; i < attempts; i++) {
+       try {
+         return await fn()
+       } catch (error) {
+         if (i === attempts - 1) throw error
+         await new Promise((resolve) => setTimeout(resolve, delay))
+       }
+     }
+
+     throw new Error('Retry failed')
+   }
+   ```
+
+2. **Fallback Values**
+   ```typescript
+   // src/lib/fallback.ts
+   export function withFallback<T>(
+     fn: () => T,
+     fallback: T
+   ): T {
+     try {
+       return fn()
+     } catch {
+       return fallback
+     }
+   }
+   ```
+
+3. **Circuit Breaker**
+   ```typescript
+   // src/lib/circuit-breaker.ts
+   export class CircuitBreaker {
+     private failures = 0
+     private lastFailure?: Date
+     private readonly threshold: number
+     private readonly timeout: number
+
+     constructor(threshold = 5, timeout = 60000) {
+       this.threshold = threshold
+       this.timeout = timeout
+     }
+
+     async execute<T>(fn: () => Promise<T>): Promise<T> {
+       if (this.isOpen()) {
+         throw new Error('Circuit breaker is open')
+       }
+
+       try {
+         const result = await fn()
+         this.reset()
+         return result
+       } catch (error) {
+         this.recordFailure()
+         throw error
+       }
+     }
+
+     private isOpen(): boolean {
+       if (this.failures < this.threshold) return false
+       if (!this.lastFailure) return false
+
+       const now = new Date()
+       const diff = now.getTime() - this.lastFailure.getTime()
+       return diff < this.timeout
+     }
+
+     private recordFailure() {
+       this.failures++
+       this.lastFailure = new Date()
+     }
+
+     private reset() {
+       this.failures = 0
+       this.lastFailure = undefined
+     }
+   }
+   ```
+
+### Error Documentation
+
+1. **Error Codes**
+   ```typescript
+   // src/lib/error-codes.ts
+   export const ErrorCodes = {
+     VALIDATION_ERROR: 'E001',
+     AUTHENTICATION_ERROR: 'E002',
+     AUTHORIZATION_ERROR: 'E003',
+     NOT_FOUND_ERROR: 'E004',
+     DATABASE_ERROR: 'E005',
+   } as const
+   ```
+
+2. **Error Messages**
+   ```typescript
+   // src/lib/error-messages.ts
+   export const ErrorMessages = {
+     [ErrorCodes.VALIDATION_ERROR]: 'Invalid input data provided',
+     [ErrorCodes.AUTHENTICATION_ERROR]: 'Authentication required',
+     [ErrorCodes.AUTHORIZATION_ERROR]: 'Insufficient permissions',
+     [ErrorCodes.NOT_FOUND_ERROR]: 'Resource not found',
+     [ErrorCodes.DATABASE_ERROR]: 'Database operation failed',
+   } as const
+   ```
+
+3. **Error Documentation**
+   ```typescript
+   // src/lib/error-docs.ts
+   export const ErrorDocs = {
+     [ErrorCodes.VALIDATION_ERROR]: {
+       description: 'Invalid input data was provided',
+       possibleCauses: [
+         'Missing required fields',
+         'Invalid field format',
+         'Field value out of range',
+       ],
+       solutions: [
+         'Check input data against schema',
+         'Validate data before submission',
+         'Review API documentation',
+       ],
+     },
+     // ... other error documentation
+   } as const

@@ -1,0 +1,25 @@
+{
+  "totalComponents": 56,
+  "componentsByType": {
+    "block": 1,
+    "ui": 53,
+    "hook": 2
+  },
+  "dependencies": {
+    "total": 83,
+    "unique": 43
+  },
+  "registryDependencies": {
+    "total": 33,
+    "unique": 19
+  },
+  "styles": {
+    "componentsWithTailwind": 1,
+    "componentsWithCssVars": 1
+  },
+  "performance": {
+    "totalFileSize": "183.30KB",
+    "processingTime": "0.14s",
+    "averageTimePerComponent": "2.46ms"
+  }
+}
