@@ -1,111 +1,113 @@
-import React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
-import { X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+'use client'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
 } from '@/components/ui/card'
-import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '@/components/ui/toast'
+import { LOCAL_STORAGE_KEYS } from '@/config/local-storage-keys'
+import { cn } from '@/lib/utils'
+import { type VariantProps, cva } from 'class-variance-authority'
+import { X } from 'lucide-react'
+import React, { useState } from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 
 const builtByVariants = cva(
-  'fixed z-50 flex items-center justify-between',
-  {
-    variants: {
-      variant: {
-        banner: 'inset-x-0 bottom-0 p-4 bg-primary text-primary-foreground',
-        toast: 'max-w-md w-full',
-        popover: 'max-w-sm rounded-lg shadow-lg',
-      },
-    },
-    defaultVariants: {
-      variant: 'banner',
-    },
-  }
+	'fixed z-50 flex items-center justify-between text-xs animate-in fade-in-0 transition-opacity duration-500 delay-1000',
+	{
+		variants: {
+			variant: {
+				banner: 'inset-x-0 bottom-0 p-4 bg-primary text-primary-foreground',
+				popover: 'bottom-md right-md max-w-sm rounded-lg shadow-lg',
+			},
+		},
+		defaultVariants: {
+			variant: 'banner',
+		},
+	}
 )
 
-export interface BuiltByShipkitProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof builtByVariants> {
-  title?: string
-  description?: string
-  onClose?: () => void
+export interface AttributionProps
+	extends React.HTMLAttributes<HTMLDivElement>,
+	VariantProps<typeof builtByVariants> {
+	title?: string
+	description?: string
+	onClose?: () => void
+	open?: boolean
 }
 
-export function BuiltByShipkit({
-  className,
-  variant,
-  title = 'Built with Shipkit',
-  description = 'The ultimate Next.js starter kit for your project',
-  onClose,
-  ...props
-}: BuiltByShipkitProps) {
-  const Content = () => (
-    <>
-      <div>
-        <h3 className="font-semibold">{title}</h3>
-        <p className="text-sm">{description}</p>
-      </div>
-      {onClose && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0"
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </Button>
-      )}
-    </>
-  )
+export function Attribution({
+	className,
+	variant = 'banner',
+	title = 'Built with Shipkit',
+	description = 'The ultimate Next.js starter kit for your project',
+	onClose,
+	open = true,
+	...props
+}: AttributionProps) {
+	const [wasClosed, setWasClosed] = useLocalStorage(LOCAL_STORAGE_KEYS.attributionClosed, false)
+	const [isOpen, setIsOpen] = useState(open)
 
-  if (variant === 'banner') {
-    return (
-      <div className={cn(builtByVariants({ variant }), className)} {...props}>
-        <div className="container flex items-center justify-between">
-          <Content />
-        </div>
-      </div>
-    )
-  }
+	const handleClose = () => {
+		setIsOpen(false)
+		setWasClosed(true)
+		onClose?.()
+	}
 
-  if (variant === 'toast') {
-    return (
-      <ToastProvider>
-        <Toast className={cn(builtByVariants({ variant }), className)} {...props}>
-          <ToastTitle>{title}</ToastTitle>
-          <ToastDescription>{description}</ToastDescription>
-          {onClose && <ToastClose />}
-        </Toast>
-        <ToastViewport />
-      </ToastProvider>
-    )
-  }
+	const Content = () => (
+		<>
+			<div>
+				<h3 className="font-semibold">{title}</h3>
+				<p className="text-sm">{description}</p>
+			</div>
+			{onClose && (
+				<Button
+					variant="ghost"
+					size="icon"
+					className="shrink-0"
+					onClick={handleClose}
+				>
+					<X className="h-4 w-4" />
+					<span className="sr-only">Close</span>
+				</Button>
+			)}
+		</>
+	)
 
-  if (variant === 'popover') {
-    return (
-      <Card className={cn(builtByVariants({ variant }), className)} {...props}>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            className="w-full"
-            onClick={() => window.open('https://shipkit.dev', '_blank')}
-          >
-            Learn More
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
+	if (variant === 'banner' && isOpen) {
+		return (
+			<div className={cn(builtByVariants({ variant }), className)} {...props}>
+				<div className="container flex items-center justify-between">
+					<Content />
+					<button onClick={handleClose} type="button" className="absolute top-2 right-2"><X className="h-4 w-4" /></button>
+				</div>
+			</div>
+		)
+	}
 
-  return null
+	if (variant === 'popover' && isOpen) {
+		return (
+			<Card className={cn(builtByVariants({ variant }), className)} {...props}>
+				<button onClick={handleClose} type="button" className="absolute top-2 right-2"><X className="h-4 w-4" /></button>
+				<CardHeader>
+					<CardTitle>{title}</CardTitle>
+					<CardDescription>{description}</CardDescription>
+				</CardHeader>
+				<CardContent className="flex gap-2 justify-end">
+					<Button
+						className="w-full"
+						variant="outline"
+						onClick={() => window.open('https://shipkit.io', '_blank')}
+					>
+						More...
+					</Button>
+				</CardContent>
+			</Card>
+		)
+	}
+
+	return null
 }
 

@@ -1,13 +1,18 @@
 import { ExampleAppSection } from "@/app/(app)/(demo)/examples/_components/example-app-section";
+import AnimatedCounter from "@/app/(app)/(landing)/_components/animated-counter";
 import { FAQ } from "@/app/(app)/(landing)/_components/faq";
 import { FeaturesCards } from "@/app/(app)/(landing)/_components/features-cards";
+import { FeaturesGrid } from "@/app/(app)/(landing)/_components/features-grid";
 import { ParticlesHero } from "@/app/(app)/(landing)/_components/particles-hero";
 import { PricingSection } from "@/app/(app)/(landing)/_components/pricing-section";
 import { SocialDock } from "@/app/(app)/(landing)/_components/social-dock";
 import { SocialMarquee } from "@/app/(app)/(landing)/_components/social-marquee";
+import { Spotlight } from "@/app/(app)/(landing)/_components/spotlight";
+import { TestimonialsGrid } from "@/app/(app)/(landing)/_components/testimonials-grid";
 import AnimatedButton from "@/components/buttons/animated-button/animated-button";
 import { Icons } from "@/components/images/icons";
 import { Link } from "@/components/primitives/link";
+import ExampleMasonry from "@/components/primitives/masonry";
 import {
 	Section,
 	SectionContent,
@@ -18,11 +23,15 @@ import {
 import AnimatedGradientText from "@/components/ui/animated-gradient-text";
 import BlurFade from "@/components/ui/blur-fade";
 import { buttonVariants } from "@/components/ui/button";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { Cover } from "@/components/ui/cover";
+import { FeaturesTimed } from "@/components/ui/cui/features-timed";
+import { SimpleFeaturesCards } from "@/components/ui/cui/simple-features-cards";
 import { HoverInfo } from "@/components/ui/hover-info";
 import Meteors from "@/components/ui/meteors";
 import NumberTicker from "@/components/ui/number-ticker";
 import { ProfileCard } from "@/components/ui/profile-card";
+import { Vortex } from "@/components/ui/vortex";
 import { routes } from "@/config/routes";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -234,16 +243,122 @@ export default async function Home({
 					<ProfileCard />
 				</Section>
 
+				{process.env.NEXT_PUBLIC_VERCEL_ENV !== "production" && (
+					<>
+						<TestimonialsGrid />
+						<CardSpotlight className="h-96 w-96">
+							<p className="relative z-20 mt-2 text-xl font-bold text-white">
+								Authentication steps
+							</p>
+							<div className="relative z-20 mt-4 text-neutral-200">
+								Follow these steps to secure your account:
+							</div>
+							<p className="relative z-20 mt-4 text-sm text-neutral-300">
+								Ensuring your account is properly secured helps protect your
+								personal information and data.
+							</p>
+						</CardSpotlight>
 
-				<Section>
-					<SectionHeader>
-						Trusted by more than <NumberTicker value={150} /> developers
-					</SectionHeader>
-					<SectionContent className="">
-						<SocialMarquee />
-					</SectionContent>
-				</Section>
+						<h2 className="mb-8 text-center text-3xl font-bold">
+							DEVELOPMENT DEMO
+						</h2>
+						<Section>
+							<SectionTitle>AI Workflows</SectionTitle>
+							<SectionHeader>Supercharged AI tools</SectionHeader>
+							<SectionCopy>
+								We ❤️ v0. <br />
+								{siteConfig.name} includes a suite of AI tools to help you build
+								your product faster.
+								<br />
+								<Link href="#" className={buttonVariants({ variant: "link" })}>
+									See it in action
+								</Link>
+							</SectionCopy>
+						</Section>
 
+						<Section>
+							<SectionHeader>
+								Built by a solopreneur with{" "}
+								<span className="font-bold underline">Hustle</span>
+							</SectionHeader>
+							<SectionCopy>
+								A lifelong web developer with a
+								<span className="font-bold underline">passion</span>
+								for clean, performant, and maintainable code.
+							</SectionCopy>
+						</Section>
+
+						<Section>
+							<SectionHeader>
+								Trusted by more than <NumberTicker value={150} /> developers
+							</SectionHeader>
+							<SectionContent className="">
+								<SocialMarquee />
+							</SectionContent>
+						</Section>
+
+						<Section>Tabs: designers, developers, founders</Section>
+
+						<Section>
+							<SectionTitle>Showcase</SectionTitle>
+							<SectionHeader>We can't wait to see what you build</SectionHeader>
+							<ExampleMasonry />
+						</Section>
+
+						<Section>
+							<FeaturesTimed />
+						</Section>
+
+						<Section>
+							<SimpleFeaturesCards />
+						</Section>
+
+						<Section>
+							<SectionHeader>Made with you in mind</SectionHeader>
+							<SectionCopy>
+								{siteConfig.name} isn't just for Developers.
+								<br />
+								We include tools for Marketers, Designers, and Founders. Export
+								Figma directly into React components, drag-and-drop code using
+								Builder, and manage your documentation with Markdown.
+							</SectionCopy>
+							<SectionContent>
+								<FeaturesGrid />
+							</SectionContent>
+						</Section>
+
+						<div className="mx-auto h-[30rem] w-[calc(100%-4rem)] overflow-hidden rounded-md">
+							<Vortex
+								backgroundColor="black"
+								className="flex h-full w-full flex-col items-center justify-center px-2 py-4 md:px-10"
+							>
+								<h2 className="text-center text-2xl font-bold text-white md:text-6xl">
+									The hell is this?
+								</h2>
+								<p className="mt-6 max-w-xl text-center text-sm text-white md:text-2xl">
+									This is chemical burn. It&apos;ll hurt more than you&apos;ve
+									ever been burned and you&apos;ll have a scar.
+								</p>
+								<div className="mt-6 flex flex-col items-center gap-4 sm:flex-row">
+									<button type="button" className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow-[0px_2px_0px_0px_#FFFFFF40_inset] transition duration-200 hover:bg-blue-700">
+										Order now
+									</button>
+									<button type="button" className="px-4 py-2 text-white">
+										Watch trailer
+									</button>
+								</div>
+							</Vortex>
+						</div>
+
+						<Spotlight />
+
+						<div className="mt-4 flex flex-col items-center justify-center gap-2">
+							<p className="text-sm text-muted-foreground">Downloads</p>
+							<AnimatedCounter />
+						</div>
+
+					</>
+				)}
 				<SocialDock className="fixed bottom-12 left-0 right-0 z-50" />
 			</div>
 		</>

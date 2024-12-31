@@ -113,6 +113,10 @@ export const routes = {
 
 	// External links
 	external: {
+		shipkit: "https://shipkit.io",
+		bones: "https://bones.sh",
+		log: "https://log.bones.sh",
+		ui: "https://ui.bones.sh",
 		buy: siteConfig.store.format.buyUrl("muscles"),
 		twitter: siteConfig.links.twitter,
 		twitter_follow: siteConfig.links.twitter_follow,

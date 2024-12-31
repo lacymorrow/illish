@@ -36,6 +36,7 @@ const defaultGroups: FooterElement[] = [
 				{ href: routes.home, label: "Home" },
 				{ href: routes.features, label: "Features" },
 				{ href: routes.pricing, label: "Pricing" },
+				{ href: routes.external.bones, label: "Bones" },
 			],
 		},
 	},
@@ -130,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({
 			<div className="container relative flex md:min-h-80 w-full flex-col items-stretch gap-2xl py-2xl">
 				<div className="flex flex-col lg:flex-row justify-between gap-2xl">
 					<div className="flex flex-col gap-2xl">
-						<h1 className="text-4xl font-bold">{siteConfig.name}</h1>
+						<Link href={routes.home}><h1 className="text-4xl font-bold">{siteConfig.name}</h1></Link>
 					</div>
 					<div className="flex flex-col md:flex-row flex-wrap lg:gap-20">
 						{groupElements}
