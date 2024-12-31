@@ -21,7 +21,6 @@ import { useSession } from "next-auth/react";
 import type React from "react";
 import { useMemo } from "react";
 
-import { Search as S } from "@/components/search";
 import { Search } from "@/components/search/search";
 import styles from "@/styles/header.module.css";
 import { BoxesIcon } from "lucide-react";
@@ -97,8 +96,6 @@ export const Header: React.FC<HeaderProps> = ({
 							<span className="sr-only">{logoText}</span>
 						</Link>
 						<Search />
-						<S />
-
 					</div>
 
 					<Sheet>

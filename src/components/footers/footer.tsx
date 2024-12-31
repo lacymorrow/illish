@@ -42,7 +42,7 @@ const defaultGroups: FooterElement[] = [
 	{
 		type: "group",
 		content: {
-			header: { label: "Resources", href: "#" },
+			header: { label: "Resources" },
 			items: [
 				{ href: routes.docs, label: "Documentation" },
 				{ href: routes.blog, label: "Blog" },
