@@ -1,112 +1,76 @@
-"use client";
+import { Check, Sparkles, ArrowRight } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
-import { Link } from "@/components/primitives/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { siteConfig } from "@/config/site";
-import { cn } from "@/lib/utils";
+export default function PricingSection() {
+  return (
+    <div className="relative min-h-[500px] w-full bg-black text-white">
+      {/* Background gradient effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent" />
+      
+      <div className="container mx-auto px-4 py-24">
+        <Card className="relative mx-auto max-w-3xl overflow-hidden border-purple-500/50 bg-black/50 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent" />
+          <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-purple-500/10 blur-[100px]" />
+          
+          <CardHeader className="relative space-y-4 p-8 text-center sm:p-12">
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-3xl font-bold sm:text-4xl">Shipkit</h2>
+              <Sparkles className="h-6 w-6 text-purple-400" />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-2xl font-bold text-gray-400 line-through sm:text-3xl">$250</span>
+                <span className="text-4xl font-bold sm:text-5xl">$99</span>
+              </div>
+              <div className="inline-block rounded-full bg-purple-500/10 px-4 py-1 text-purple-400">
+                Limited Time Offer - 60% OFF
+              </div>
+            </div>
+          </CardHeader>
 
-// Define the type for a pricing tier
-export interface PricingTier {
-	name: string;
-	price: React.ReactNode;
-	description: string;
-	cta: string;
-	highlighted?: boolean;
-	disabled?: boolean;
-	href?: string;
+          <CardContent className="relative space-y-8 p-8 sm:p-12">
+            <div className="grid gap-6 sm:grid-cols-2">
+              {[
+                "Complete CI/CD Solution",
+                "Premium Features",
+                "Priority Support",
+                "Advanced Integrations",
+                "Regular Updates",
+                "Commercial License",
+                "Team Collaboration",
+                "Custom Workflows"
+              ].map((feature) => (
+                <div key={feature} className="flex items-center gap-2">
+                  <Check className="h-5 w-5 shrink-0 text-purple-400" />
+                  <span className="text-base">{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4">
+              <Button size="lg" className="w-full bg-purple-500 text-lg text-white hover:bg-purple-600">
+                Get Shipkit Now
+              </Button>
+            </div>
+
+            <div className="mt-8 border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+              <p>
+                Looking for a free solution?{' '}
+                <a 
+                  href="https://github.com/shipkit/shipkit-bones" 
+                  className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300"
+                >
+                  Check out Shipkit Bones on GitHub 
+                  <ArrowRight className="h-3 w-3" />
+                </a>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
 }
 
-// Update the PricingSection component to accept tiers as a prop
-interface PricingSectionProps {
-	tiers: PricingTier[];
-}
-
-// Example configuration for pricing tiers
-const pricingTiers: PricingTier[] = [
-	{
-		name: "Bones",
-		price: "$29",
-		description:
-			"Perfect for individuals and small teams who just want to get started.",
-		cta: `Get ${siteConfig.name} Bones`,
-		href: "/signup?plan=bones",
-	},
-	{
-		name: "Muscles",
-		price: "$99",
-		description: "Ideal for growing businesses and larger teams.",
-		cta: `Get ${siteConfig.name} Muscles`,
-		highlighted: true,
-		href: "/signup?plan=muscles",
-		disabled: true,
-	},
-	{
-		name: "Brains",
-		price: "$249",
-		description:
-			"Fully-featured, tailored solutions with pre-built integrations and building blocks for large-scale organizations. AI-workflows, etc.",
-		cta: "Coming Soon",
-		disabled: true,
-	},
-];
-
-export function PricingSection({ tiers = pricingTiers }: PricingSectionProps) {
-	return (
-		<div className="grid gap-8 md:grid-cols-3">
-			{tiers.map((tier) => (
-				<Card
-					key={tier.name}
-					className={cn("flex flex-col", {
-						"scale-105 border-primary shadow-lg": tier.highlighted,
-					})}
-				>
-					<CardHeader>
-						<CardTitle className="text-2xl">{tier.name}</CardTitle>
-						<CardDescription className="text-sm">
-							{tier.description}
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="flex-grow">
-						<p className="mb-4 text-4xl font-bold">{tier.price}</p>
-					</CardContent>
-					<CardFooter>
-						{tier.href ? (
-							<Link
-								href={tier.href}
-								className={cn(
-									buttonVariants({
-										variant: tier.highlighted ? "default" : "outline",
-									}),
-									"w-full",
-									{ "bg-primary hover:bg-primary/90": tier.highlighted },
-								)}
-								aria-disabled={tier.disabled}
-								tabIndex={tier.disabled ? -1 : undefined}
-							>
-								{tier.cta}
-							</Link>
-						) : (
-							<Button
-								variant={tier.highlighted ? "default" : "outline"}
-								className={cn("w-full", {
-									"bg-primary hover:bg-primary/90": tier.highlighted,
-								})}
-								disabled={tier.disabled}
-							>
-								{tier.cta}
-							</Button>
-						)}
-					</CardFooter>
-				</Card>
-			))}
-		</div>
-	);
-}
