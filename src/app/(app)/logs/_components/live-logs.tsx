@@ -1,6 +1,5 @@
 "use client";
 
-import type { ApiKey } from "@/app/(app)/logs/api-keys/_components/api-keys-table";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import {
@@ -14,6 +13,7 @@ import { routes } from "@/config/routes";
 import { logger } from "@/lib/logger";
 import type { Log } from "@/types/logs";
 import { useEffect, useState } from "react";
+import type { ApiKey } from "../log-api-keys/_components/api-keys-table";
 import { logColumns } from "./columns";
 
 interface LiveLogsProps {

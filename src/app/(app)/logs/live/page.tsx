@@ -1,4 +1,3 @@
-import { LiveLogs } from "@/app/(app)/logs/_components/live-logs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
 import { routes } from "@/config/routes";
@@ -7,6 +6,7 @@ import { apiKeyService } from "@/server/services/api-key-service";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LiveLogs } from "../_components/live-logs";
 
 export default async function LiveLogsPage() {
 	const session = await auth();
