@@ -1,5 +1,5 @@
-import { LandingPageComponent } from "@/app/(app)/logs/_components/landing-page";
 import { auth } from "@/server/auth";
+import { LandingPageComponent } from "./_components/landing-page";
 
 const LandingPage = async () => {
 	const session = await auth();

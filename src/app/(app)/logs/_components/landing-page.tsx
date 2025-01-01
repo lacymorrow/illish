@@ -156,7 +156,7 @@ export function LandingPageComponent({ user }: { user?: User }) {
 					/>
 				</motion.div>
 
-				<section className="relative px-4 py-20 text-white">
+				<section className="relative px-4 py-20 text-white max-w-screen-xl mx-auto">
 					<NetworkLog />
 				</section>
 			</main>

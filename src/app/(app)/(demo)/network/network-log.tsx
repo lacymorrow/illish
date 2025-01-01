@@ -23,7 +23,7 @@ interface NetworkRequest {
 
 const networkLogVariants = cva(
 	// Base styles
-	"overflow-hidden rounded-lg shadow-2xl",
+	"overflow-hidden rounded-lg shadow-2xl mx-auto",
 	{
 		variants: {
 			variant: {
@@ -31,7 +31,7 @@ const networkLogVariants = cva(
 				modern: "bg-gray-900 bg-opacity-40 backdrop-blur-xl border border-gray-700 rounded-3xl",
 			},
 			size: {
-				default: "w-full max-w-4xl",
+				default: "w-full",
 				compact: "w-full max-w-md",
 			},
 		},
