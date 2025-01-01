@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RegistryBrowserPage() {
 	return (
 		<div className="container py-10">
-			<h1 className="text-4xl font-bold mb-8">Bones CLI</h1>
+			<h1 className="text-4xl font-bold mb-8">Run <pre>shadcn add</pre> for the last time.</h1>
 			<p>Install UI components without leaving your browser.</p>
 			<Suspense fallback={<SuspenseFallback />}>
 				<RegistryBrowser />
