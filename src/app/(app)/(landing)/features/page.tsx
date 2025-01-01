@@ -1,5 +1,5 @@
-import { FAQ } from "@/app/(app)/(landing)/_components/faq";
-import { FeaturesTable } from "@/app/(app)/(landing)/_components/features-table";
+import { FAQ } from "./_components/faq";
+import { FeaturesTable } from "./_components/features-table";
 
 export default async function Features() {
 	return (

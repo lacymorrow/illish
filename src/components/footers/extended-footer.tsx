@@ -1,5 +1,5 @@
-import { SubscribeForm } from "@/app/(app)/(landing)/_components/SubscribeForm";
-import { FeedbackPopover } from "@/app/(app)/(landing)/_components/feedback-popover";
+import { FeedbackPopover } from "@/components/forms/feedback-popover";
+import { SubscribeForm } from "@/components/forms/subscribe-form";
 import { Link } from "@/components/primitives/link";
 import { buttonVariants } from "@/components/ui/button";
 import RetroGrid from "@/components/ui/retro-grid";

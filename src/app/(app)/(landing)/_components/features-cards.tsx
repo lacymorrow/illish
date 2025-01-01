@@ -1,7 +1,7 @@
-import { GradientCards } from "@/app/(app)/(landing)/_components/gradient-cards";
 import { Section, SectionHeader } from "@/components/primitives/section";
 import { getPayloadContent } from "@/lib/utils/get-payload-content";
 import type { Feature } from "@/payload-types";
+import { GradientCards } from "./gradient-cards";
 
 type StaticFeature = {
 	name: string;

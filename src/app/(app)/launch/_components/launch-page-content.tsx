@@ -1,10 +1,9 @@
-import { FAQ } from "@/app/(app)/(landing)/_components/faq";
-import { ParticlesHero } from "@/app/(app)/(landing)/_components/particles-hero";
-import { PricingSectionSubtle } from "@/app/(app)/(landing)/_components/pricing-section-subtle";
+
 import { Link } from "@/components/primitives/link";
 import { Section } from "@/components/primitives/section";
 import { buttonVariants } from "@/components/ui/button";
 import { CodeWindow } from "@/components/ui/code-window";
+import { ParticlesHero } from "@/components/ui/particles-hero";
 import { routes } from "@/config/routes";
 import { auth } from "@/server/auth";
 import { RocketIcon } from "lucide-react";
@@ -102,19 +101,6 @@ export async function LaunchPageContent() {
 								code={codeExample}
 							/>
 						</div>
-					</Section>
-
-					{/* Pricing Section */}
-					<Section className="container">
-						<h2 className="mb-12 text-center text-3xl font-bold">
-							Ready to Launch?
-						</h2>
-						<PricingSectionSubtle />
-					</Section>
-
-					{/* FAQ Section */}
-					<Section className="container">
-						<FAQ />
 					</Section>
 
 					{/* Final CTA */}

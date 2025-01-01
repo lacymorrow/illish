@@ -1,12 +1,12 @@
 "use client";
 
-import { CustomerAvatars } from "@/app/(app)/(landing)/_components/customer-avatars";
 import { Section } from "@/components/primitives/section";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import { motion } from "framer-motion";
 import { BrandLogos } from "./brand-logos";
+import { CustomerAvatars } from "./customer-avatars";
 
 const stats = [
 	{
