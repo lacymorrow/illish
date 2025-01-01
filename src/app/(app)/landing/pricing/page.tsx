@@ -1,6 +1,6 @@
-import { FAQ } from "@/app/(app)/(landing)/_components/faq";
-import { PricingSectionSubtle } from "@/app/(app)/(landing)/_components/pricing-section-subtle";
 import { siteConfig } from "@/config/site";
+import { FAQ } from "../_components/faq";
+import { PricingSectionSubtle } from "../_components/pricing-section-subtle";
 
 export default function PricingPage() {
 	return (

@@ -1,3 +1,4 @@
+// Todo
 "use client";
 
 import { Link } from "@/components/primitives/link";
@@ -12,7 +13,7 @@ import dynamic from "next/dynamic";
 // Dynamically import server components
 const ParticlesHero = dynamic(
 	() =>
-		import("@/app/(app)/(landing)/_components/particles-hero").then(
+		import("@/components/ui/particles-hero").then(
 			(mod) => mod.ParticlesHero,
 		),
 	{ ssr: true },

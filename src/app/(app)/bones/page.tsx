@@ -1,5 +1,5 @@
-import { SubscribeForm } from "@/app/(app)/(landing)/_components/SubscribeForm";
 import { Attribution } from "@/components/blocks/attribution";
+import { SubscribeForm } from "@/components/forms/subscribe-form";
 import { Balancer } from "@/components/primitives/balancer";
 import { Link } from "@/components/primitives/link";
 import { buttonVariants } from "@/components/ui/button";

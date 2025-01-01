@@ -1,10 +1,4 @@
 import { ExampleAppSection } from "@/app/(app)/(demo)/examples/_components/example-app-section";
-import { FAQ } from "@/app/(app)/(landing)/_components/faq";
-import { FeaturesCards } from "@/app/(app)/(landing)/_components/features-cards";
-import { ParticlesHero } from "@/app/(app)/(landing)/_components/particles-hero";
-import { PricingSection } from "@/app/(app)/(landing)/_components/pricing-section";
-import { SocialDock } from "@/app/(app)/(landing)/_components/social-dock";
-import { SocialMarquee } from "@/app/(app)/(landing)/_components/social-marquee";
 import AnimatedButton from "@/components/buttons/animated-button/animated-button";
 import { Icons } from "@/components/images/icons";
 import { Link } from "@/components/primitives/link";
@@ -28,7 +22,13 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import type { SearchParams } from "@/types/utils";
 import { ChevronRightIcon } from "lucide-react";
+import { FAQ } from "./_components/faq";
+import { FeaturesCards } from "./_components/features-cards";
+import { ParticlesHero } from "./_components/particles-hero";
+import { PricingSection } from "./_components/pricing-section";
 import PrimaryCta from "./_components/primary-cta";
+import { SocialDock } from "./_components/social-dock";
+import { SocialMarquee } from "./_components/social-marquee";
 import { SocialProof } from "./_components/social-proof";
 const headings = [
 	"Launch your app at light speed.",
