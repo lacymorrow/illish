@@ -1,7 +1,9 @@
 import "@/styles/globals.css";
 
-import { GeistSans as fontSans } from "geist/font/sans";
-import { Noto_Serif_Display as FontSerif } from "next/font/google";
+import {
+	Space_Grotesk as FontSans,
+	Noto_Serif_Display as FontSerif,
+} from "next/font/google";
 // import localFont from "next/font/local";
 
 import { Analytics } from "@/components/primitives/analytics";
@@ -23,6 +25,12 @@ const fontSerif = FontSerif({
 	style: ["normal", "italic"],
 	subsets: ["latin"],
 	variable: "--font-serif",
+});
+
+const fontSans = FontSans({
+	display: "swap",
+	subsets: ["latin"],
+	variable: "--font-sans",
 });
 
 // const fontSud = localFont({

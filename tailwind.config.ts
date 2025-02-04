@@ -14,9 +14,12 @@ const config = {
 	prefix: "",
 	theme: {
     	extend: {
+			perspective: {
+				1000: "1000px",
+			},
     		fontFamily: {
     			sans: [
-    				'var(--font-geist-sans)',
+    				'var(--font-sans)',
                     ...fontFamily.sans
                 ],
     			serif: [
