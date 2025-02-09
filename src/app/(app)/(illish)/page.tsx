@@ -21,14 +21,13 @@ export default function Page() {
 					<div className="mx-auto max-w-4xl text-center">
 						{/* Eyebrow text with gradient */}
 						<p className="backdrop-blur-md mb-6 inline-block rounded-full bg-gradient-to-r from-background/80 via-background/90 to-background/80 px-4 py-1.5 text-sm font-medium text-primary shadow-sm">
-							Your Vision, Amplified Through Code
+							React + Next.js Experts
 						</p>
 
 						{/* Main Heading */}
 						<h1 className="animate-fadeDown mb-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
 							<Balancer>
-								Turn Your <span className="font-serif text-primary">Bold Ideas</span>{" "}
-								Into Digital Reality
+								Websites that actually <span className="font-serif text-primary">convert</span>
 							</Balancer>
 						</h1>
 
